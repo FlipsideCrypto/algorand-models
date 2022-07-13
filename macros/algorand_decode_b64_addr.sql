@@ -1,4 +1,4 @@
-{% macro algorand_decode_b64_addr() %}
+{% macro create_algorand_decode_b64_addr() %}
     {% set sql %}
     CREATE
     OR REPLACE EXTERNAL FUNCTION algorand_decode_b64_addr(

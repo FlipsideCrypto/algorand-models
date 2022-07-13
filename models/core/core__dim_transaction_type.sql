@@ -1,6 +1,6 @@
 {{ config(
     materialized = 'incremental',
-    unique_key = 'dim_transaction_tpye_id',
+    unique_key = 'dim_transaction_type_id',
     incremental_strategy = 'merge'
 ) }}
 
@@ -9,7 +9,7 @@ WITH base AS (
     SELECT
         {{ dbt_utils.surrogate_key(
             ['tx_type']
-        ) }} AS dim_transaction_tpye_id,
+        ) }} AS dim_transaction_type_id,
         tx_type,
         MAX(_inserted_timestamp) _inserted_timestamp
     FROM
@@ -28,11 +28,11 @@ AND _inserted_timestamp >= (
 )
 {% endif %}
 GROUP BY
-    dim_transaction_tpye_id,
+    dim_transaction_type_id,
     tx_type
 )
 SELECT
-    dim_transaction_tpye_id,
+    dim_transaction_type_id,
     tx_type,
     CASE
         tx_type
@@ -51,7 +51,7 @@ SELECT
     {{ dbt_utils.surrogate_key(
         ['null']
     ) }}
-    dim_transaction_tpye_id,
-    NULL AS x_type,
+    dim_transaction_type_id,
+    NULL AS tx_type,
     NULL AS tx_type_name,
     CURRENT_DATE AS _inserted_timestamp

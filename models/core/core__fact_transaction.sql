@@ -62,11 +62,11 @@ SELECT
     ) AS dim_asset_id,
     fee,
     COALESCE(
-        dim_transaction_tpye_id,
+        dim_transaction_type_id,
         {{ dbt_utils.surrogate_key(
             ['null']
         ) }}
-    ) AS dim_transaction_tpye_id,
+    ) AS dim_transaction_type_id,
     tx_message,
     extra,
     A._inserted_timestamp
