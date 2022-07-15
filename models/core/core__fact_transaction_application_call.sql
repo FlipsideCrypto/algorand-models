@@ -61,7 +61,7 @@ AND _inserted_timestamp >= (
 )
 SELECT
     {{ dbt_utils.surrogate_key(
-        ['a.block_id','a.intra','a.tx_type']
+        ['fact_transaction_id','a.tx_type']
     ) }} AS fact_transaction_application_call_id,
     A.fact_transaction_id,
     COALESCE(

@@ -122,7 +122,7 @@ FROM
 
 {% if is_incremental() %}
 WHERE
-    ab._inserted_timestamp >= (
+    b._inserted_timestamp >= (
         (
             SELECT
                 MAX(
