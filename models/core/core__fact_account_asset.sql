@@ -1,7 +1,8 @@
 {{ config(
     materialized = 'incremental',
     unique_key = 'fact_account_asset_id',
-    incremental_strategy = 'merge'
+    incremental_strategy = 'merge',
+    cluster_by = ['asset_added_at::DATE']
 ) }}
 
 WITH base AS (
@@ -42,24 +43,28 @@ SELECT
             ['null']
         ) }}
     ) AS dim_account_id,
+    da.address,
     COALESCE(
         dim_asset_id,
         {{ dbt_utils.surrogate_key(
             ['null']
         ) }}
     ) AS dim_asset_id,
+    das.asset_id,
     COALESCE(
         C.dim_block_id,
         {{ dbt_utils.surrogate_key(
             ['null']
         ) }}
     ) AS dim_block_id__asset_added_at,
+    C.block_timestamp AS asset_added_at,
     COALESCE(
         b.dim_block_id,
         {{ dbt_utils.surrogate_key(
             ['null']
         ) }}
     ) AS dim_block_id__asset_last_removed,
+    b.block_timestamp AS asset_last_removed,
     asset_closed,
     frozen,
     A._inserted_timestamp,

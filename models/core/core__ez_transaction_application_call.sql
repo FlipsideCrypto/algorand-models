@@ -13,22 +13,16 @@ SELECT
     b.tx_sender,
     fee,
     app_id,
-    tx_type,
-    tx_type_name,
+    'appl' AS tx_type,
+    'application call' AS tx_type_name,
     tx_message,
     extra,
-    A._inserted_timestamp,
+    b._inserted_timestamp,
     '{{ env_var("DBT_CLOUD_RUN_ID", "manual") }}' AS _audit_run_id
 FROM
     {{ ref('core__fact_transaction') }}
     b
     JOIN {{ ref('core__dim_block') }} C
     ON b.dim_block_id = C.dim_block_id
-    JOIN {{ ref('core__dim_application') }}
-    d
-    ON A.dim_application_id = d.dim_application_id
-    JOIN {{ ref('core__dim_transaction_type') }}
-    f
-    ON b.dim_transaction_type_id = f.dim_transaction_type_id
 WHERE
-    f.tx_type = 'appl'
+    b.dim_transaction_type_id = '63469c3c4f19f07c737127a117296de4'

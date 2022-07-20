@@ -1,7 +1,8 @@
 {{ config(
     materialized = 'incremental',
     unique_key = 'fact_account_application_id',
-    incremental_strategy = 'merge'
+    incremental_strategy = 'merge',
+    cluster_by = ['created_at::DATE']
 ) }}
 
 WITH base AS (
@@ -40,25 +41,29 @@ SELECT
             ['null']
         ) }}
     ) AS dim_account_id,
+    da.address,
     COALESCE(
         dim_application_id,
         {{ dbt_utils.surrogate_key(
             ['null']
         ) }}
     ) AS dim_application_id,
+    A.app_id,
     app_info,
-    COALESCE(
-        b.dim_block_id,
-        {{ dbt_utils.surrogate_key(
-            ['null']
-        ) }}
-    ) AS dim_block_id__closed_at,
     COALESCE(
         C.dim_block_id,
         {{ dbt_utils.surrogate_key(
             ['null']
         ) }}
     ) AS dim_block_id__created_at,
+    C.block_timestamp AS created_at,
+    COALESCE(
+        b.dim_block_id,
+        {{ dbt_utils.surrogate_key(
+            ['null']
+        ) }}
+    ) AS dim_block_id__closed_at,
+    b.block_timestamp AS closed_at,
     A._inserted_timestamp,
     '{{ env_var("DBT_CLOUD_RUN_ID", "manual") }}' AS _audit_run_id
 FROM
