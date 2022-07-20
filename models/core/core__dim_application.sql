@@ -1,7 +1,8 @@
 {{ config(
     materialized = 'incremental',
     unique_key = 'dim_application_id',
-    incremental_strategy = 'merge'
+    incremental_strategy = 'merge',
+    cluster_by = ['created_at::DATE']
 ) }}
 
 WITH base AS (
@@ -44,19 +45,23 @@ SELECT
             ['null']
         ) }}
     ) AS dim_account_id__creator,
-    COALESCE(
-        b.dim_block_id,
-        {{ dbt_utils.surrogate_key(
-            ['null']
-        ) }}
-    ) AS dim_block_id__closed_at,
+    da.address AS creator_address,
     COALESCE(
         C.dim_block_id,
         {{ dbt_utils.surrogate_key(
             ['null']
         ) }}
     ) AS dim_block_id__created_at,
-    A._inserted_timestamp
+    C.block_timestamp AS created_at,
+    COALESCE(
+        b.dim_block_id,
+        {{ dbt_utils.surrogate_key(
+            ['null']
+        ) }}
+    ) AS dim_block_id__closed_at,
+    b.block_timestamp AS closed_at,
+    A._inserted_timestamp,
+    '{{ env_var("DBT_CLOUD_RUN_ID", "manual") }}' AS _audit_run_id
 FROM
     base A
     LEFT JOIN {{ ref('core__dim_block') }}
@@ -78,10 +83,14 @@ SELECT
     {{ dbt_utils.surrogate_key(
         ['null']
     ) }} AS dim_account_id__creator,
-    {{ dbt_utils.surrogate_key(
-        ['null']
-    ) }} AS dim_block_id__closed_at,
+    NULL AS creator_address,
     {{ dbt_utils.surrogate_key(
         ['null']
     ) }} AS dim_block_id__created_at,
-    CURRENT_DATE AS _inserted_timestamp
+    NULL AS created_at,
+    {{ dbt_utils.surrogate_key(
+        ['null']
+    ) }} AS dim_block_id__closed_at,
+    NULL AS closed_at,
+    CURRENT_DATE AS _inserted_timestamp,
+    '{{ env_var("DBT_CLOUD_RUN_ID", "manual") }}' AS _audit_run_id

@@ -9,7 +9,8 @@ SELECT
         ['keytype']
     ) }} AS dim_wallet_type_id,
     keytype AS wallet_type,
-    MAX(_inserted_timestamp) _inserted_timestamp
+    MAX(_inserted_timestamp) _inserted_timestamp,
+    '{{ env_var("DBT_CLOUD_RUN_ID", "manual") }}' AS _audit_run_id
 FROM
     {{ ref('bronze__account') }}
 WHERE
@@ -34,4 +35,5 @@ SELECT
         ['null']
     ) }} AS dim_wallet_type_id,
     NULL AS wallet_type,
-    CURRENT_DATE _inserted_timestamp
+    CURRENT_DATE _inserted_timestamp,
+    '{{ env_var("DBT_CLOUD_RUN_ID", "manual") }}' AS _audit_run_id

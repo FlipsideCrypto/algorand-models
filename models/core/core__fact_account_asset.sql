@@ -62,7 +62,8 @@ SELECT
     ) AS dim_block_id__asset_last_removed,
     asset_closed,
     frozen,
-    A._inserted_timestamp
+    A._inserted_timestamp,
+    '{{ env_var("DBT_CLOUD_RUN_ID", "manual") }}' AS _audit_run_id
 FROM
     base A
     LEFT JOIN {{ ref('core__dim_block') }}

@@ -1,7 +1,8 @@
 {{ config(
     materialized = 'incremental',
     unique_key = 'dim_account_id',
-    incremental_strategy = 'merge'
+    incremental_strategy = 'merge',
+    cluster_by = ['created_at::DATE']
 ) }}
 
 SELECT
@@ -25,17 +26,19 @@ SELECT
         6
     ) AS balance,
     COALESCE(
-        b.dim_block_id,
-        {{ dbt_utils.surrogate_key(
-            ['null']
-        ) }}
-    ) AS dim_block_id__closed_at,
-    COALESCE(
         C.dim_block_id,
         {{ dbt_utils.surrogate_key(
             ['null']
         ) }}
     ) AS dim_block_id__created_at,
+    C.block_timestamp AS created_at,
+    COALESCE(
+        b.dim_block_id,
+        {{ dbt_utils.surrogate_key(
+            ['null']
+        ) }}
+    ) AS dim_block_id__closed_at,
+    b.block_timestamp AS closed_at,
     COALESCE(
         d.dim_wallet_type_id,
         {{ dbt_utils.surrogate_key(
@@ -43,7 +46,8 @@ SELECT
         ) }}
     ) AS dim_wallet_type_id,
     account_data,
-    A._inserted_timestamp
+    A._inserted_timestamp,
+    '{{ env_var("DBT_CLOUD_RUN_ID", "manual") }}' AS _audit_run_id
 FROM
     {{ ref('bronze__account') }} A
     LEFT JOIN {{ ref('core__dim_block') }}
@@ -78,12 +82,15 @@ SELECT
     NULL AS balance,
     {{ dbt_utils.surrogate_key(
         ['null']
-    ) }} AS dim_block_id__closed_at,
+    ) }} AS dim_block_id__created_at,
+    NULL AS created_at,
     {{ dbt_utils.surrogate_key(
         ['null']
-    ) }} AS dim_block_id__created_at,
+    ) }} AS dim_block_id__closed_at,
+    NULL AS closed_at,
     {{ dbt_utils.surrogate_key(
         ['null']
     ) }} AS dim_wallet_type_id,
     NULL AS account_data,
-    CURRENT_DATE _inserted_timestamp
+    CURRENT_DATE _inserted_timestamp,
+    '{{ env_var("DBT_CLOUD_RUN_ID", "manual") }}' AS _audit_run_id

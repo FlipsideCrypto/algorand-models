@@ -2,7 +2,7 @@
     materialized = 'incremental',
     unique_key = 'dim_block_id',
     incremental_strategy = 'merge',
-    cluster_by = ['block_timestamp::DATE'],
+    cluster_by = ['block_timestamp::DATE']
 ) }}
 
 SELECT
@@ -22,7 +22,8 @@ SELECT
         ms,
         __HEVO__LOADED_AT,
         '1970-01-01'
-    ) AS _INSERTED_TIMESTAMP
+    ) AS _INSERTED_TIMESTAMP,
+    '{{ env_var("DBT_CLOUD_RUN_ID", "manual") }}' AS _audit_run_id
 FROM
     {{ ref('bronze__block') }}
 
@@ -51,4 +52,5 @@ SELECT
     NULL AS prev_block_hash,
     NULL AS txn_root,
     NULL AS header,
-    CURRENT_DATE _inserted_timestamp
+    CURRENT_DATE _inserted_timestamp,
+    '{{ env_var("DBT_CLOUD_RUN_ID", "manual") }}' AS _audit_run_id

@@ -43,7 +43,8 @@ SELECT
         WHEN 'afrz' THEN 'asset freeze'
         WHEN 'appl' THEN 'application call'
     END tx_type_name,
-    _inserted_timestamp
+    _inserted_timestamp,
+    '{{ env_var("DBT_CLOUD_RUN_ID", "manual") }}' AS _audit_run_id
 FROM
     base
 UNION ALL
@@ -54,4 +55,5 @@ SELECT
     dim_transaction_type_id,
     NULL AS tx_type,
     NULL AS tx_type_name,
-    CURRENT_DATE AS _inserted_timestamp
+    CURRENT_DATE AS _inserted_timestamp,
+    '{{ env_var("DBT_CLOUD_RUN_ID", "manual") }}' AS _audit_run_id
