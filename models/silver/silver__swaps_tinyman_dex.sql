@@ -58,7 +58,7 @@ tx_a_tfer AS (
         dim_transaction_type_id = 'c495d86d106bb9c67e5925d952e553f2'
 
 {% if is_incremental() %}
-AND _INSERTED_TIMESTAMP >= (
+AND pt._INSERTED_TIMESTAMP >= (
     SELECT
         MAX(
             _INSERTED_TIMESTAMP
@@ -97,7 +97,10 @@ sender_pay AS (
         pt.tx_sender AS swapper,
         'ALGO' AS from_asset_name,
         0 AS from_asset_id,
-        amount AS swap_from_amount
+        amount :: FLOAT / pow(
+            10,
+            6
+        ) AS swap_from_amount
     FROM
         tinymanapp ta
         JOIN tx_pay pt
@@ -112,9 +115,9 @@ sender_asset AS (
         asset_name AS from_asset_name,
         asset_id AS from_asset_id,
         CASE
-            WHEN A.decimals > 0 THEN asset_amount :: FLOAT / pow(
+            WHEN decimals > 0 THEN asset_amount :: FLOAT / pow(
                 10,
-                A.decimals
+                decimals
             )
             ELSE asset_amount :: FLOAT
         END AS swap_from_amount
@@ -131,7 +134,10 @@ receiver_pay AS(
         pt.tx_sender AS pool_address,
         'ALGO' AS to_asset_name,
         0 AS to_asset_id,
-        ZEROIFNULL(amount) AS swap_to_amount
+        ZEROIFNULL(amount) :: FLOAT / pow(
+            10,
+            6
+        ) AS swap_to_amount
     FROM
         tinymanapp ta
         JOIN tx_pay pt
@@ -143,13 +149,13 @@ receiver_asset AS (
     SELECT
         pt.tx_group_id,
         pt.tx_sender AS pool_address,
-        A.asset_name AS to_asset_name,
-        A.asset_id AS to_asset_id,
+        asset_name AS to_asset_name,
+        asset_id AS to_asset_id,
         CASE
-            WHEN A.decimals > 0 THEN ZEROIFNULL(
+            WHEN decimals > 0 THEN ZEROIFNULL(
                 asset_amount :: FLOAT / pow(
                     10,
-                    A.decimals
+                    decimals
                 )
             )
             ELSE ZEROIFNULL(

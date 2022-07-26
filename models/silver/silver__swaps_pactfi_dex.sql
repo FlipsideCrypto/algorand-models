@@ -116,7 +116,7 @@ pactfi_app AS(
         tx_app_call act
         JOIN {{ ref('core__dim_asset') }}
         asa
-        ON act.dim_asset_id = asa.dim_asset_id
+        ON act.tx_message :dt :itx [0] :txn :xaid :: NUMBER = asa.asset_id
     WHERE
         block_timestamp :: DATE > '2022-02-01'
         AND app_id IN (
@@ -136,7 +136,10 @@ from_pay_swaps AS(
         pt.intra,
         pt.tx_sender AS swapper,
         'ALGO' AS from_asset_name,
-        amount AS swap_from_amount,
+        amount :: FLOAT / pow(
+            10,
+            6
+        ) AS swap_from_amount,
         0 AS from_asset_id
     FROM
         pactfi_app pa

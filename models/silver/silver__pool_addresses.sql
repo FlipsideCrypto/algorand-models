@@ -32,28 +32,21 @@ pool_names AS(
         swap_program,
         pool_address,
         CASE
-            WHEN swap_from_asset_id = 0 THEN 'ALGO'
+            WHEN A.asset_id = 0 THEN 'ALGO'
             ELSE A.asset_name
         END AS swap_from_asset_name,
         CASE
-            WHEN swap_to_asset_id = 0 THEN 'ALGO'
+            WHEN b.asset_id = 0 THEN 'ALGO'
             ELSE b.asset_name
         END AS swap_to_asset_name,
-        MAX(
-            s._INSERTED_TIMESTAMP
-        ) AS _INSERTED_TIMESTAMP
+        s._INSERTED_TIMESTAMP
     FROM
         swaps s
         JOIN {{ ref('core__dim_asset') }} A
         ON s.dim_asset_id__swap_from = A.dim_asset_id
         JOIN {{ ref('core__dim_asset') }}
         b
-        ON s.dim_asset_id__swap_to = b.dim_asset_id
-    GROUP BY
-        swap_program,
-        pool_address,
-        swap_from_asset_name,
-        swap_to_asset_name qualify ROW_NUMBER() over (
+        ON s.dim_asset_id__swap_to = b.dim_asset_id qualify ROW_NUMBER() over (
             PARTITION BY pool_address
             ORDER BY
                 A.created_at DESC,

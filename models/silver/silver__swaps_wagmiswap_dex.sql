@@ -42,17 +42,6 @@ AND _INSERTED_TIMESTAMP >= (
         {{ this }}
 ) - INTERVAL '4 HOURS'
 {% endif %}
-
-{% if is_incremental() %}
-AND _INSERTED_TIMESTAMP >= (
-    SELECT
-        MAX(
-            _INSERTED_TIMESTAMP
-        )
-    FROM
-        {{ this }}
-) - INTERVAL '4 HOURS'
-{% endif %}
 ),
 tx_pay AS (
     SELECT
@@ -61,17 +50,6 @@ tx_pay AS (
         {{ ref('core__fact_transaction') }}
     WHERE
         dim_transaction_type_id = 'b02a45a596bfb86fe2578bde75ff5444'
-
-{% if is_incremental() %}
-AND _INSERTED_TIMESTAMP >= (
-    SELECT
-        MAX(
-            _INSERTED_TIMESTAMP
-        )
-    FROM
-        {{ this }}
-) - INTERVAL '4 HOURS'
-{% endif %}
 
 {% if is_incremental() %}
 AND _INSERTED_TIMESTAMP >= (
@@ -111,9 +89,9 @@ AND _INSERTED_TIMESTAMP >= (
 ),
 wagmi_app AS(
     SELECT
-        act.block_id,
-        act.intra,
-        act.tx_group_id,
+        block_id,
+        intra,
+        tx_group_id,
         block_timestamp,
         act._INSERTED_TIMESTAMP,
         tx_sender AS swapper,
@@ -143,7 +121,10 @@ wagmi_app AS(
             tx_message :dt :itx [0] :txn :snd :: STRING
         ) AS pool_address
     FROM
-        tx_a_tfer
+        tx_app_call act
+        LEFT JOIN {{ ref('core__dim_asset') }}
+        asa
+        ON act.tx_message :dt :itx [0] :txn :xaid :: NUMBER = asa.asset_id
     WHERE
         app_id IN (
             SELECT
@@ -162,7 +143,10 @@ from_pay_swaps AS(
         pt.intra,
         pt.tx_sender AS swapper,
         'ALGO' AS from_asset_name,
-        amount AS swap_from_amount,
+        amount :: FLOAT / pow(
+            10,
+            6
+        ) AS swap_from_amount,
         0 AS from_asset_id
     FROM
         wagmi_app wa
@@ -178,7 +162,7 @@ from_axfer_swaps AS(
         wa.tx_group_id AS tx_group_id,
         pt.intra,
         pt.tx_sender AS swapper,
-        A.asset_name AS from_asset_name,
+        asset_name AS from_asset_name,
         CASE
             WHEN decimals > 0 THEN asset_amount / pow(
                 10,
@@ -192,7 +176,7 @@ from_axfer_swaps AS(
         JOIN tx_a_tfer pt
         ON wa.tx_group_id = pt.tx_group_id
         AND wa.intra -1 = pt.intra
-        AND wa.swapper = pt.sender
+        AND wa.swapper = pt.tx_sender
     WHERE
         pt.inner_tx = 'FALSE'
 ),

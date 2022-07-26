@@ -20,7 +20,7 @@ WITH base AS (
         pool_address,
         swap_to_asset_id,
         swap_to_amount,
-        A._inserted_timestamp
+        _inserted_timestamp
     FROM
         {{ ref('silver__swaps_tinyman_dex') }}
 
@@ -49,7 +49,7 @@ SELECT
     pool_address,
     swap_to_asset_id,
     swap_to_amount,
-    A._inserted_timestamp
+    _inserted_timestamp
 FROM
     {{ ref('silver__swaps_algofi_dex') }}
 
@@ -78,7 +78,7 @@ SELECT
     pool_address,
     swap_to_asset_id,
     swap_to_amount,
-    A._inserted_timestamp
+    _inserted_timestamp
 FROM
     {{ ref('silver__swaps_pactfi_dex') }}
 
@@ -107,7 +107,7 @@ SELECT
     pool_address,
     swap_to_asset_id,
     swap_to_amount,
-    A._inserted_timestamp
+    _inserted_timestamp
 FROM
     {{ ref('silver__swaps_wagmiswap_dex') }}
 )
@@ -154,7 +154,7 @@ FROM
     ON A.swap_from_asset_id = C.asset_id
     JOIN {{ ref('core__dim_asset') }}
     d
-    ON A.swap_fromswap_to_asset_id_asset_id = d.asset_id
+    ON A.swap_to_asset_id = d.asset_id
     JOIN {{ ref('core__dim_application') }}
     e
     ON A.app_id = e.app_id
