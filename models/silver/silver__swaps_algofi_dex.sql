@@ -26,20 +26,14 @@ WITH algofi_app_ids AS (
 ),
 tx_app_call AS (
     SELECT
-        pt.*,
-        A.asset_name,
-        A.asset_id,
-        A.decimals
+        *
     FROM
         {{ ref('core__fact_transaction') }}
-        pt
-        JOIN {{ ref('core__dim_asset') }} A
-        ON pt.dim_asset_id = A.dim_asset_id
     WHERE
         dim_transaction_type_id = '63469c3c4f19f07c737127a117296de4'
 
 {% if is_incremental() %}
-AND _INSERTED_TIMESTAMP >= (
+AND A._INSERTED_TIMESTAMP >= (
     SELECT
         MAX(
             _INSERTED_TIMESTAMP
@@ -83,7 +77,7 @@ tx_a_tfer AS (
         dim_transaction_type_id = 'c495d86d106bb9c67e5925d952e553f2'
 
 {% if is_incremental() %}
-AND _INSERTED_TIMESTAMP >= (
+AND A._INSERTED_TIMESTAMP >= (
     SELECT
         MAX(
             _INSERTED_TIMESTAMP
@@ -130,6 +124,9 @@ algofi_app AS(
         ) AS pool_address
     FROM
         tx_app_call act
+        JOIN {{ ref('core__dim_asset') }}
+        asa
+        ON act.tx_message :dt :itx [0] :txn :xaid :: NUMBER = asa.asset_id
     WHERE
         app_id IN (
             SELECT
@@ -148,7 +145,10 @@ from_pay_swapssfe AS(
         pt.intra,
         pt.tx_sender AS swapper,
         'ALGO' AS from_asset_name,
-        pt.amount - ZEROIFNULL(
+        pt.amount / pow(
+            10,
+            6
+        ) - ZEROIFNULL(
             ref.tx_message :dt :itx [0] :txn :amt / pow(
                 10,
                 6
@@ -178,13 +178,13 @@ from_axfer_swapssfe AS(
         pt.tx_sender AS swapper,
         pt.asset_name AS from_asset_name,
         CASE
-            WHEN A.decimals > 0 THEN pt.asset_amount / pow(
+            WHEN pt.decimals > 0 THEN pt.asset_amount / pow(
                 10,
                 pt.decimals
             ) - ZEROIFNULL(
                 ref.tx_message :dt :itx [0] :txn :aamt / pow(
                     10,
-                    A.decimals
+                    pt.decimals
                 )
             )
             WHEN pt.decimals = 0 THEN pt.asset_amount - ZEROIFNULL(
@@ -279,6 +279,9 @@ algofi_appsef AS(
         ) AS pool_address
     FROM
         tx_app_call act
+        JOIN {{ ref('core__dim_asset') }}
+        asa
+        ON act.tx_message :dt :itx [0] :txn :xaid :: NUMBER = asa.asset_id
     WHERE
         app_id IN (
             SELECT
@@ -297,7 +300,10 @@ from_pay_swapssef AS(
         pt.intra,
         pt.tx_sender AS swapper,
         'ALGO' AS from_asset_name,
-        amount AS swap_from_amount,
+        amount :: FLOAT / pow(
+            10,
+            6
+        ) AS swap_from_amount,
         0 AS from_asset_id
     FROM
         algofi_appsef pa
@@ -317,7 +323,7 @@ from_axfer_swapssef AS(
         CASE
             WHEN pt.decimals > 0 THEN pt.asset_amount / pow(
                 10,
-                A.decimals
+                pt.decimals
             )
             ELSE pt.asset_amount
         END :: FLOAT AS swap_from_amount,

@@ -52,13 +52,8 @@ SELECT
     ) }}
   ) AS dim_account_id,
   A.address,
-  concat_ws(
-    '-',
-    A.block_id :: STRING,
-    intra :: STRING,
-    address :: STRING
-  ) AS _unique_key,
-  A._INSERTED_TIMESTAMP
+  A._INSERTED_TIMESTAMP,
+  '{{ env_var("DBT_CLOUD_RUN_ID", "manual") }}' AS _audit_run_id
 FROM
   base A
   LEFT JOIN {{ ref('core__dim_block') }}

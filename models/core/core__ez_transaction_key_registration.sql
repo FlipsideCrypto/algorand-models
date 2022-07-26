@@ -5,7 +5,7 @@
 SELECT
     b.block_timestamp,
     block_date,
-    block_id,
+    b.block_id,
     intra,
     tx_group_id,
     tx_id,
@@ -13,7 +13,7 @@ SELECT
     b.tx_sender,
     fee,
     participation_key,
-    rf_public_key,
+    vrf_public_key,
     vote_first,
     vote_last,
     vote_keydilution,

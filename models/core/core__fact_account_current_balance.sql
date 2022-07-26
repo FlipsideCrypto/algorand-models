@@ -37,15 +37,15 @@ SELECT
     ) }} AS fact_account_current_balance_id,
     act.dim_account_id,
     A.address,
-    rewardsbase / pow(
+    A.rewardsbase / pow(
         10,
         6
     ) AS rewards_base,
-    rewards_total / pow(
+    A.rewards_total / pow(
         10,
         6
     ) AS rewards_total,
-    microalgos / pow(
+    A.microalgos / pow(
         10,
         6
     ) AS balance,

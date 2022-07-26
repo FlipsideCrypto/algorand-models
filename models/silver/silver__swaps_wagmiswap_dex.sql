@@ -93,7 +93,7 @@ tx_a_tfer AS (
     FROM
         {{ ref('core__fact_transaction') }}
         pt
-        LEFT JOIN {{ ref('core__dim_asset') }} A
+        JOIN {{ ref('core__dim_asset') }} A
         ON pt.dim_asset_id = A.dim_asset_id
     WHERE
         dim_transaction_type_id = 'c495d86d106bb9c67e5925d952e553f2'
