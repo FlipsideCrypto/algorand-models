@@ -31,7 +31,7 @@ max_date AS (
         {{ this }}
 )
 {% endif %}
-SELECT top 10000
+SELECT 
     tx_id,
     account_id,
     DATA :"confirmed-round" :: INT AS block_id,
@@ -46,6 +46,7 @@ FROM
     ON b.file_name = metadata$filename
 WHERE
     tx_id IS NOT NULL
+    and _PARTITION_BY_DATE = '2022-07-27'
 
 {% if is_incremental() %}
 AND _PARTITION_BY_DATE >= (
