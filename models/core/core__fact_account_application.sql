@@ -12,6 +12,7 @@ WITH base AS (
             addr :: text
         ) AS address,
         app :: INT AS app_id,
+        deleted AS app_closed,
         closed_at AS closed_at,
         created_at AS created_at,
         localstate AS app_info,
@@ -49,12 +50,13 @@ SELECT
         da.dim_account_id,
         '-1'
     ) AS dim_account_id,
-    da.address,
+    A.address,
     COALESCE(
         dim_application_id,
         '-1'
     ) AS dim_application_id,
     A.app_id,
+    A.app_closed,
     app_info,
     COALESCE(
         C.dim_block_id,

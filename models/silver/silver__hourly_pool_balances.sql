@@ -145,12 +145,14 @@ reward AS (
         ) amount,
         A.block_id,
         A.intra,
-        A.block_timestamp,
+        C.block_timestamp,
         0 AS asset_id
     FROM
         {{ ref('silver__transaction_reward') }} A
         JOIN address_ranges b
         ON A.account = b.address
+        JOIN {{ ref('silver__block') }} C
+        ON A.block_id = C.block_id
 
 {% if is_incremental() %}
 WHERE
@@ -177,7 +179,7 @@ WHERE
             END amount,
             A.block_id,
             A.intra,
-            A.block_timestamp,
+            C.block_timestamp,
             asa.asset_id
         FROM
             {{ ref('silver__transaction_close') }} A
@@ -186,6 +188,8 @@ WHERE
             LEFT JOIN {{ ref('silver__asset') }}
             asa
             ON A.asset_id = asa.asset_id
+            JOIN {{ ref('silver__block') }} C
+            ON A.block_id = C.block_id
 
 {% if is_incremental() %}
 AND block_timestamp :: DATE >=(
@@ -214,7 +218,8 @@ senderasset AS(
         END * -1 AS amount,
         A.block_id,
         A.intra,
-        asset_id
+        C.block_timestamp,
+        A.asset_id
     FROM
         {{ ref('silver__transaction') }} A
         JOIN address_ranges b
@@ -225,6 +230,8 @@ senderasset AS(
         LEFT JOIN {{ ref('silver__asset') }}
         asa
         ON A.asset_id = asa.asset_id
+        JOIN {{ ref('silver__block') }} C
+        ON A.block_id = C.block_id
     WHERE
         tx_type = 'axfer'
 
@@ -252,12 +259,17 @@ receiversasset AS (
         END AS amount,
         A.block_id,
         A.intra,
-        A.block_timestamp,
-        asset_id
+        C.block_timestamp,
+        A.asset_id
     FROM
         {{ ref('silver__transaction') }} A
         JOIN address_ranges b
         ON A.asset_receiver = b.address
+        LEFT JOIN {{ ref('silver__asset') }}
+        asa
+        ON A.asset_id = asa.asset_id
+        JOIN {{ ref('silver__block') }} C
+        ON A.block_id = C.block_id
     WHERE
         tx_type = 'axfer'
 

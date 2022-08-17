@@ -129,7 +129,6 @@ SELECT
         d.block_timestamp,
         '1900-01-01' :: DATE
     ) block_timestamp,
-    A.block_id,
     COALESCE(
         d.dim_block_id,
         '-1'
