@@ -29,6 +29,7 @@ WITH appcall AS (
         ) [0] = '03'
         AND amount > 0
 
+
 {% if is_incremental() %}
 AND A._INSERTED_TIMESTAMP >= (
     SELECT
