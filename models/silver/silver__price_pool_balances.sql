@@ -20,6 +20,10 @@ WITH lps AS (
         )
         AND C.address_name NOT ILIKE '%algo fam%'
         AND C.address_name NOT ILIKE '%smart algo%'
+        AND C.address_name NOT ILIKE '%down%'
+        AND C.address_name NOT ILIKE '%UP%'
+        AND C.address_name NOT LIKE '%S-ALGO%'
+        AND C.address_name NOT LIKE '%S-Put%'
 ),
 hourly_prices_with_gaps AS (
     SELECT
@@ -28,30 +32,22 @@ hourly_prices_with_gaps AS (
     FROM
         (
             SELECT
-                p.symbol,
-                DATE_TRUNC(
-                    'hour',
-                    recorded_at
-                ) AS HOUR,
-                price
+                recorded_hour AS HOUR,
+                OPEN price
             FROM
                 {{ source(
-                    'shared',
-                    'prices_v2'
+                    'crosschain',
+                    'fact_hourly_prices'
                 ) }}
                 p
             WHERE
-                asset_id IN ('algorand', '4030')
+                id = 'algorand'
 
 {% if is_incremental() %}
-AND recorded_at :: DATE >= CURRENT_DATE - 3
+AND recorded_hour :: DATE >= CURRENT_DATE - 3
 {% else %}
-    AND recorded_at >= '2022-01-01'
+    AND recorded_hour >= '2022-01-01'
 {% endif %}
-
-qualify(ROW_NUMBER() over(PARTITION BY DATE_TRUNC('hour', recorded_at), provider
-ORDER BY
-    recorded_at DESC)) = 1
 ) x
 GROUP BY
     HOUR
