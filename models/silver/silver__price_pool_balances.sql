@@ -71,6 +71,7 @@ AND recorded_hour :: DATE >= CURRENT_DATE - 3
                     'algorand',
                     '4030'
                 )
+                AND recorded_at >= '2022-01-01'
                 AND recorded_at < '2022-08-24 01:00:00.000' qualify(ROW_NUMBER() over(PARTITION BY DATE_TRUNC('hour', recorded_at), provider
             ORDER BY
                 recorded_at DESC)) = 1

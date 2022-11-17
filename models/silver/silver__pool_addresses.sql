@@ -14,17 +14,19 @@ WITH swaps AS(
         _INSERTED_TIMESTAMP
     FROM
         {{ ref('silver__swap') }}
+    WHERE
+        swap_from_asset_id IS NOT NULL
+        AND swap_to_asset_id IS NOT NULL
 
 {% if is_incremental() %}
-WHERE
-    _INSERTED_TIMESTAMP >= (
-        SELECT
-            MAX(
-                _INSERTED_TIMESTAMP
-            )
-        FROM
-            {{ this }}
-    ) - INTERVAL '4 HOURS'
+AND _INSERTED_TIMESTAMP >= (
+    SELECT
+        MAX(
+            _INSERTED_TIMESTAMP
+        )
+    FROM
+        {{ this }}
+) - INTERVAL '4 HOURS'
 {% endif %}
 ),
 pool_names AS(
