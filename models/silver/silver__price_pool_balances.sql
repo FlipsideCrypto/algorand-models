@@ -42,12 +42,42 @@ hourly_prices_with_gaps AS (
                 p
             WHERE
                 id = 'algorand'
+                AND recorded_hour >= '2022-08-24 01:00:00.000'
 
 {% if is_incremental() %}
 AND recorded_hour :: DATE >= CURRENT_DATE - 3
 {% else %}
-    AND recorded_hour >= '2022-01-01'
-{% endif %}
+    UNION ALL
+    SELECT
+        HOUR,
+        AVG(price) price
+    FROM
+        (
+            SELECT
+                p.symbol,
+                DATE_TRUNC(
+                    'hour',
+                    recorded_at
+                ) AS HOUR,
+                price
+            FROM
+                {{ source(
+                    'shared',
+                    'prices_v2'
+                ) }}
+                p
+            WHERE
+                asset_id IN (
+                    'algorand',
+                    '4030'
+                )
+                AND recorded_at < '2022-08-24 01:00:00.000' qualify(ROW_NUMBER() over(PARTITION BY DATE_TRUNC('hour', recorded_at), provider
+            ORDER BY
+                recorded_at DESC)) = 1
+        ) x
+    GROUP BY
+        HOUR
+    {% endif %}
 ) x
 GROUP BY
     HOUR
