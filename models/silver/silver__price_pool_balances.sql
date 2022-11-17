@@ -45,40 +45,47 @@ hourly_prices_with_gaps AS (
                 AND recorded_hour >= '2022-08-24 01:00:00.000'
 
 {% if is_incremental() %}
-AND recorded_hour :: DATE >= CURRENT_DATE - 3
-{% else %}
-    UNION ALL
+AND recorded_hour :: DATE >= (
     SELECT
-        HOUR,
-        AVG(price) price
+        MAX(
+            block_hour
+        )
     FROM
-        (
-            SELECT
-                p.symbol,
-                DATE_TRUNC(
-                    'hour',
-                    recorded_at
-                ) AS HOUR,
-                price
-            FROM
-                {{ source(
-                    'shared',
-                    'prices_v2'
-                ) }}
-                p
-            WHERE
-                asset_id IN (
-                    'algorand',
-                    '4030'
-                )
-                AND recorded_at >= '2022-01-01'
-                AND recorded_at < '2022-08-24 01:00:00.000' qualify(ROW_NUMBER() over(PARTITION BY DATE_TRUNC('hour', recorded_at), provider
-            ORDER BY
-                recorded_at DESC)) = 1
-        ) x
-    GROUP BY
-        HOUR
-    {% endif %}
+        {{ this }}
+) :: DATE - 7
+{% else %}
+UNION ALL
+SELECT
+    HOUR,
+    AVG(price) price
+FROM
+    (
+        SELECT
+            p.symbol,
+            DATE_TRUNC(
+                'hour',
+                recorded_at
+            ) AS HOUR,
+            price
+        FROM
+            {{ source(
+                'shared',
+                'prices_v2'
+            ) }}
+            p
+        WHERE
+            asset_id IN (
+                'algorand',
+                '4030'
+            )
+            AND recorded_at >= '2022-01-01'
+            AND recorded_at < '2022-08-24 01:00:00.000' qualify(ROW_NUMBER() over(PARTITION BY DATE_TRUNC('hour', recorded_at), provider
+        ORDER BY
+            recorded_at DESC)) = 1
+    ) x
+GROUP BY
+    HOUR
+{% endif %}
 ) x
 GROUP BY
     HOUR
@@ -101,7 +108,14 @@ hourly_prices AS (
 
 {% if is_incremental() %}
 WHERE
-    DATE :: DATE >= CURRENT_DATE - 3
+    DATE :: DATE >= (
+        SELECT
+            MAX(
+                block_hour
+            )
+        FROM
+            {{ this }}
+    ) :: DATE - 7
 {% endif %}
 ) A
 LEFT JOIN hourly_prices_with_gaps b
@@ -167,7 +181,14 @@ balances AS (
             AND ex.address IS NULL
 
 {% if is_incremental() %}
-AND DATE :: DATE >= CURRENT_DATE - 3
+AND DATE :: DATE >= (
+    SELECT
+        MAX(
+            block_hour
+        )
+    FROM
+        {{ this }}
+) :: DATE - 7
 {% endif %}
 GROUP BY
     A.address,
