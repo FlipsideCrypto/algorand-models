@@ -48,28 +48,18 @@ AND _inserted_timestamp >= (
 ),
 app_calls AS (
     SELECT
-        tx_group_id,
-        ARRAY_AGG(
-            DISTINCT sender
-        ) within GROUP (
-            ORDER BY
-                sender
-        ) senders
+        DISTINCT tx_group_id
     FROM
         base
     WHERE
         tx_type = 'appl'
         AND app_id = 842126029
-    GROUP BY
-        1
 ),
 fin AS (
     SELECT
         A.block_id,
-        {# A.tx_group_id, #}
         A.intra,
         A.tx_id,
-        {# inner_tx, #}
         A.asset_id,
         CASE
             WHEN A.asset_id = 0 THEN A.amount / pow(
@@ -84,13 +74,11 @@ fin AS (
         END :: FLOAT AS amount,
         sender,
         asset_receiver,
-        {#  b.senders,
-        #}
         CASE
             inner_tx
             WHEN TRUE THEN 'inbound'
             WHEN FALSE THEN 'outbound'
-        END action,
+        END direction,
         A._inserted_timestamp
     FROM
         base A
@@ -120,14 +108,14 @@ SELECT
     asset_id,
     amount,
     CASE
-        WHEN action = 'inbound' THEN asset_receiver
-        WHEN action = 'outbound' THEN sender
-    END AS bridger,
+        WHEN direction = 'inbound' THEN asset_receiver
+        WHEN direction = 'outbound' THEN sender
+    END AS bridger_address,
     CASE
-        WHEN action = 'inbound' THEN sender
-        WHEN action = 'outbound' THEN asset_receiver
+        WHEN direction = 'inbound' THEN sender
+        WHEN direction = 'outbound' THEN asset_receiver
     END AS bridge_address,
-    action,
+    direction,
     _inserted_timestamp
 FROM
     fin

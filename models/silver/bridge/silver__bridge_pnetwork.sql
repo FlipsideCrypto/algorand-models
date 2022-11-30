@@ -76,18 +76,8 @@ mid AS (
             WHEN b.arg1 LIKE '%swap%' THEN 'inbound'
             WHEN b.arg1 LIKE '%issue%' THEN 'inbound'
             WHEN b.arg1 LIKE '%withdraw%' THEN 'outbound'
-        END AS action,
-        CASE
-            WHEN A.asset_id = 0 THEN A.amount / pow(
-                10,
-                6
-            )
-            WHEN sa.decimals > 0 THEN A.amount / pow(
-                10,
-                sa.decimals
-            )
-            ELSE A.amount
-        END :: FLOAT AS amount,
+        END AS direction,
+        A.amount,
         sender,
         asset_receiver,
         A._inserted_timestamp
@@ -95,9 +85,6 @@ mid AS (
         base A
         INNER JOIN app_calls b
         ON A.tx_group_id = b.tx_group_id
-        LEFT JOIN {{ ref('silver__asset') }}
-        sa
-        ON A.asset_id = sa.asset_id
     WHERE
         A.tx_type = 'axfer'
 )
@@ -113,7 +100,7 @@ SELECT
             'LEHOHH76T2EDG4AY7HIZVDX7V6V7JSVMCT7VGE3HTK23BEDIILEWQP6SAU'
         ) THEN sender
         ELSE asset_receiver
-    END AS bridger,
+    END AS bridger_address,
     CASE
         WHEN sender IN (
             'MUJD2WXDDZLTZCKE2SBZVSBEQ55HT5RJH4BC2WHFV4DLP37EQNWT44ITWE',
@@ -121,18 +108,18 @@ SELECT
         ) THEN asset_receiver
         ELSE sender
     END AS bridge_address,
-    action,
+    direction,
     _inserted_timestamp
 FROM
     mid
 WHERE
     CASE
-        WHEN action = 'inbound'
+        WHEN direction = 'inbound'
         AND asset_receiver IN (
             'MUJD2WXDDZLTZCKE2SBZVSBEQ55HT5RJH4BC2WHFV4DLP37EQNWT44ITWE',
             'LEHOHH76T2EDG4AY7HIZVDX7V6V7JSVMCT7VGE3HTK23BEDIILEWQP6SAU'
         ) THEN 'false'
-        WHEN action = 'outbound'
+        WHEN direction = 'outbound'
         AND sender = 'MUJD2WXDDZLTZCKE2SBZVSBEQ55HT5RJH4BC2WHFV4DLP37EQNWT44ITWE' THEN 'false'
         ELSE TRUE
     END = TRUE

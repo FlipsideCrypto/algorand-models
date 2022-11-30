@@ -23,12 +23,12 @@ models:
       - name: AMOUNT
         tests:
           - not_null
-      - name: BRIDGER
+      - name: BRIDGER_ADDRESS
         tests:
           - not_null
       - name: BRIDGE_ADDRESS
         tests:
           - not_null
-      - name: ACTION
+      - name: DIRECTION
         tests:
           - not_null

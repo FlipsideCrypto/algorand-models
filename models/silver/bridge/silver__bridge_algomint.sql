@@ -48,9 +48,9 @@ algomint AS (
         tx_id,
         asset_id,
         amount,
-        asset_receiver bridger,
+        asset_receiver bridger_address,
         sender AS bridge_address,
-        'inbound' AS action,
+        'inbound' AS direction,
         _inserted_timestamp
     FROM
         base
@@ -63,9 +63,9 @@ algomint AS (
         tx_id,
         asset_id,
         amount,
-        sender bridger,
+        sender bridger_address,
         asset_receiver AS bridge_address,
-        'outbound' AS action,
+        'outbound' AS direction,
         _inserted_timestamp
     FROM
         base
@@ -77,23 +77,10 @@ SELECT
     intra,
     tx_id,
     A.asset_id,
-    CASE
-        WHEN A.asset_id = 0 THEN A.amount / pow(
-            10,
-            6
-        )
-        WHEN sa.decimals > 0 THEN A.amount / pow(
-            10,
-            sa.decimals
-        )
-        ELSE A.amount
-    END :: FLOAT AS amount,
-    bridger,
+    amount,
+    bridger_address,
     bridge_address,
-    action,
+    direction,
     A._inserted_timestamp
 FROM
     algomint A
-    LEFT JOIN {{ ref('silver__asset') }}
-    sa
-    ON A.asset_id = sa.asset_id
