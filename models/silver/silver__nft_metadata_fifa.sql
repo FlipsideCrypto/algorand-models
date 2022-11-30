@@ -29,6 +29,7 @@ WITH base AS (
             WHEN 1 THEN 'genesis'
             WHEN 2 THEN 'archives'
             WHEN 3 THEN 'south american flair'
+            WHEN 4 THEN 'archives 2'
         END drop_name,
         CASE
             WHEN description LIKE '%Womens World Cup%' THEN 'Womens'
@@ -119,6 +120,12 @@ WITH base AS (
                 WHEN item_no < 4 THEN 'Iconic'
                 WHEN item_no < 13 THEN 'Epic'
                 WHEN item_no < 31 THEN 'Rare'
+                ELSE 'Common'
+            END
+            WHEN 4 THEN CASE
+                WHEN item_no < 2 THEN 'Iconic'
+                WHEN item_no < 6 THEN 'Epic'
+                WHEN item_no < 18 THEN 'Rare'
                 ELSE 'Common'
             END
         END rarity
