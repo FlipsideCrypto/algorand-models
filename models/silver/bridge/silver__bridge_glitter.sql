@@ -35,6 +35,7 @@ WITH base AS (
             'axfer',
             'pay'
         )
+        AND block_id >= 23693885
         AND COALESCE(
             asset_receiver,
             receiver,
@@ -71,14 +72,8 @@ app_calls AS (
             tx_message :txn :apaa [5]
         ) :: STRING solana_tx_id,
         CASE
-            WHEN description IN (
-                'algo-release',
-                'xSOL-deposit'
-            ) THEN 'inbound'
-            WHEN description IN (
-                'algo-deposit',
-                'xSOL-release'
-            ) THEN 'outbound'
+            WHEN description LIKE '%release' THEN 'inbound'
+            WHEN description LIKE '%deposit' THEN 'outbound'
         END AS direction
     FROM
         base
@@ -86,7 +81,6 @@ app_calls AS (
         tx_type = 'appl'
         AND app_id = 813301700
         AND description NOT LIKE '%refund' -- memo states this is for a failed transaction
-        AND block_id >= 23693885
 )
 SELECT
     A.block_id,
@@ -109,7 +103,7 @@ SELECT
     solana_token,
     algorand_token,
     description,
-    REPLACE(
+    NULLIF(
         solana_tx_id,
         'null'
     ) AS solana_tx_id,
