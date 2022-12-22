@@ -1,0 +1,31 @@
+version: 2
+models:
+  - name: silver__governance_actions
+    description: ""
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - BLOCK_ID
+            - INTRA
+    columns:
+      - name: BLOCK_ID
+        tests:
+          - not_null
+      - name: INTRA
+        tests:
+          - not_null
+      - name: SENDER
+        tests:
+          - not_null
+      - name: RECEIVER
+        tests:
+          - not_null
+      - name: NOTE
+        tests:
+          - not_null
+      - name: COMMITMENT
+        tests:
+          - not_null
+      - name: NON_ALGO_COMMIT
+        tests:
+          - not_null

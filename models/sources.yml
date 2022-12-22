@@ -60,6 +60,10 @@ sources:
     schema: bronze_api
     tables: 
       - name: nft_fifa_collect_secondary
+      - name: governance_periods_list
+      - name: governance_period
+      - name: governance_voting_session
+      - name: governance_accepted_assets
   - name: algorand_db_external
     database: flipside_prod_db
     schema: bronze

@@ -104,7 +104,7 @@ pactfi_app AS(
         ) AS pool_address
     FROM
         tx_app_call act
-        JOIN {{ ref('silver__asset') }}
+        LEFT JOIN {{ ref('silver__asset') }}
         asa
         ON act.tx_message :dt :itx [0] :txn :xaid :: NUMBER = asa.asset_id
     WHERE
