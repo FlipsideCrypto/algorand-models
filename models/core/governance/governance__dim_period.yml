@@ -1,0 +1,18 @@
+version: 2
+models:
+  - name: governance__dim_period
+    description: "Records of all governance periods "
+    columns:
+      - name: DIM_PERIOD_ID
+      - name: ID
+      - name: SLUG
+      - name: TITLE
+      - name: START_DATETIME
+      - name: REGISTRATION_END_DATETIME
+      - name: ACTIVE_STATE_END_DATETIME
+      - name: END_DATETIME
+      - name: SIGN_UP_ADDRESS
+      - name: IS_ACTIVE
+    tests:
+      - dbt_constraints.primary_key:
+          column_name: DIM_PERIOD_ID

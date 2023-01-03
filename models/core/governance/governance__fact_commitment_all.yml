@@ -1,0 +1,67 @@
+version: 2
+models:
+  - name: governance__fact_commitment_all
+    description: "The applications related to an account"
+    columns:
+      - name: FACT_COMMITMENT_ALL_ID
+        description: "{{ doc('sk') }}"
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: DIM_ACCOUNT_ID
+        description: "FK to DIM_ACCOUNT for this address"
+        tests:
+          - not_null
+      - name: ADDRESS
+        description: "{{ doc('address') }}"
+        tests:
+          - not_null
+      - name: DIM_APPLICATION_ID
+        description: "FK to DIM_APPLICATION for this app id"
+        tests:
+          - not_null
+          - negative_one:
+              where: _inserted_timestamp <  (CURRENT_TIMESTAMP - INTERVAL '8 HOURS')
+      - name: APP_ID
+        description: "{{ doc('app_id') }}"
+        tests:
+          - not_null
+      - name: APP_INFO
+        description: "Is the app currently deleted from the account? If not it will have json about current status"
+        tests:
+          - not_null:
+              where: APP_CLOSED = FALSE
+      - name: DIM_BLOCK_ID__CREATED_AT
+        description: "FK to DIM_BLOCK which app was added to the account"
+        tests:
+          - not_null
+          - negative_one:
+              where: _inserted_timestamp <  (CURRENT_TIMESTAMP - INTERVAL '8 HOURS')
+      - name: CREATED_AT
+        description: "Block timestamp that the app(app_id)  was added to an account"
+      - name: DIM_BLOCK_ID__CLOSED_AT
+        description: "FK to DIM_BLOCK during which the app was last removed from the account"
+        tests:
+          - not_null
+      - name: CLOSED_AT
+        description: "Block timestamp that the app(app_id) was last removed from the account"
+        tests:
+          - dbt_expectations.expect_column_to_exist      
+    tests:
+      - dbt_constraints.primary_key:
+          column_name: FACT_COMMITMENT_ALL_ID
+      - dbt_constraints.foreign_key:
+          fk_column_name: DIM_ACCOUNT_ID
+          pk_table_name: ref('core__dim_account')
+          pk_column_name: DIM_ACCOUNT_ID
+      - dbt_constraints.foreign_key:
+          fk_column_name: DIM_APPLICATION_ID
+          pk_table_name: ref('core__dim_application')
+          pk_column_name: DIM_APPLICATION_ID
+      - dbt_constraints.foreign_key:
+          fk_column_name: DIM_BLOCK_ID__CREATED_AT
+          pk_table_name: ref('core__dim_block')
+          pk_column_name: DIM_BLOCK_ID
+      - dbt_constraints.foreign_key:
+          fk_column_name: DIM_BLOCK_ID__CLOSED_AT
+          pk_table_name: ref('core__dim_block')
+          pk_column_name: DIM_BLOCK_ID

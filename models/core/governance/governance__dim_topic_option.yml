@@ -1,0 +1,18 @@
+version: 2
+models:
+  - name: governance__dim_topic_option
+    description: "Records of all governance topic options "
+    columns:
+      - name: DIM_TOPIC_OPTION_ID
+      - name: ID
+      - name: TITLE
+      - name: INDICATOR
+      - name: IS_FOUNDATION_CHOICE
+      - name: DIM_TOPIC_ID
+    tests:
+      - dbt_constraints.primary_key:
+          column_name: DIM_TOPIC_OPTION_ID
+      - dbt_constraints.foreign_key:
+          fk_column_name: DIM_TOPIC_ID
+          pk_table_name: ref('governance__dim_topic')
+          pk_column_name: DIM_TOPIC_ID
