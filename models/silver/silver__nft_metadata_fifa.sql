@@ -30,6 +30,7 @@ WITH base AS (
             WHEN 2 THEN 'archives'
             WHEN 3 THEN 'south american flair'
             WHEN 4 THEN 'archives 2'
+            WHEN 5 THEN '80s-90s'
         END drop_name,
         CASE
             WHEN description LIKE '%Womens World Cup%' THEN 'Womens'
@@ -84,22 +85,26 @@ WITH base AS (
             1
         ) AS country_2_score,
         SUBSTRING(description, REGEXP_INSTR(description, ', **') + 4, REGEXP_INSTR(description, ':') - REGEXP_INSTR(description, ', **') -4) AS event_type,
-        SUBSTRING(description, REGEXP_INSTR(description, ':') + 2, REGEXP_INSTR(description, '[0-9]', REGEXP_INSTR(description, ':')) - (REGEXP_INSTR(description, ':') + 2)) AS player,
-        REPLACE(
-            SUBSTRING(
-                description,
-                REGEXP_INSTR(
+        CASE
+            WHEN description LIKE '%:%' THEN SUBSTRING(description, REGEXP_INSTR(description, ':') + 2, REGEXP_INSTR(description, '[0-9]', REGEXP_INSTR(description, ':')) - (REGEXP_INSTR(description, ':') + 2))
+        END AS player,
+        CASE
+            WHEN description LIKE '%:%' THEN REPLACE(
+                SUBSTRING(
                     description,
-                    ' [0-9]',
                     REGEXP_INSTR(
                         description,
-                        ':'
-                    )
+                        ' [0-9]',
+                        REGEXP_INSTR(
+                            description,
+                            ':'
+                        )
+                    ),
+                    10
                 ),
-                10
-            ),
-            '**'
-        ) AS MINUTE,
+                '**'
+            )
+        END AS MINUTE,
         SUBSTRING(asset_name, REGEXP_INSTR(asset_name, '-') + 1, 2) AS item_no,
         SUBSTRING(NAME, REGEXP_INSTR(NAME, '\\(') + 1, (REGEXP_INSTR(NAME, '\\)') - REGEXP_INSTR(NAME, '\\(') - 10)) AS editions,
         CASE
@@ -126,6 +131,12 @@ WITH base AS (
                 WHEN item_no < 2 THEN 'Iconic'
                 WHEN item_no < 6 THEN 'Epic'
                 WHEN item_no < 18 THEN 'Rare'
+                ELSE 'Common'
+            END
+            WHEN 5 THEN CASE
+                WHEN item_no < 4 THEN 'Iconic'
+                WHEN item_no < 13 THEN 'Epic'
+                WHEN item_no < 31 THEN 'Rare'
                 ELSE 'Common'
             END
         END rarity

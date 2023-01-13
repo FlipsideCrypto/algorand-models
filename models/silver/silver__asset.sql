@@ -232,6 +232,5 @@ FROM
     ON A.asset_id = coll.nft
     LEFT JOIN arc69_NFTs arc69
     ON A.asset_id = arc69.nft
-    LEFT JOIN {{ ref('silver__nft_metadata_fifa') }}
-    fifa
+    LEFT JOIN silver.nft_metadata_fifa fifa
     ON A.asset_id = fifa.nft_asset_id
