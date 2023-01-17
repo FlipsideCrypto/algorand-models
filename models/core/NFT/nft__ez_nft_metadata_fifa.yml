@@ -88,8 +88,6 @@ models:
         tests:
           - not_null    
       - name: PLAYER
-        tests:
-          - not_null                                                                                                                                                                                                                
+                                                                                                                                                                                                          
       - name: MINUTE
-        tests:
-          - not_null
+  

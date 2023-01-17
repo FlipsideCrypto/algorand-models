@@ -24,6 +24,7 @@ WITH lps AS (
         AND C.address_name NOT ILIKE '%UP%'
         AND C.address_name NOT LIKE '%S-ALGO%'
         AND C.address_name NOT LIKE '%S-Put%'
+        AND C.address <> 'CJKYTA2V2G3OIBUQYV34VKSCNSMAGTOMYNGJJUZY2AFORCPUIHCJC423QY'
 ),
 base_price AS (
     SELECT

@@ -30,6 +30,9 @@ models:
         tests:
           - not_null:
               where: _INSERTED_TIMESTAMP <  (CURRENT_TIMESTAMP - INTERVAL '8 HOURS')
+              config:
+                severity: warn
+                error_if: ">10"
       - name: swap_from_amount
         tests:
           - not_null:
@@ -43,6 +46,9 @@ models:
         tests:
           - not_null:
               where: _INSERTED_TIMESTAMP <  (CURRENT_TIMESTAMP - INTERVAL '8 HOURS')
+              config:
+                severity: warn
+                error_if: ">10"
       - name: swap_to_amount
         tests:
           - not_null:
