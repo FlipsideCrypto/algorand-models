@@ -8,7 +8,7 @@
 WITH base AS (
 
     SELECT
-        silver.decode_hex_addr(
+        silver.algorand_decode_hex_addr(
             addr :: text
         ) AS address,
         app :: INT AS app_id,
