@@ -3,7 +3,14 @@
     unique_key = "fact_daily_balance_id",
     incremental_strategy = 'merge',
     cluster_by = ['date'],
-    post_hook = "ALTER TABLE {{ this }} ADD SEARCH OPTIMIZATION"
+    post_hook = "ALTER TABLE {{ this }} ADD SEARCH OPTIMIZATION",
+      meta={
+        'database_tags':{
+            'table': {
+                'PURPOSE': 'BALANCES'
+            }
+        }
+      }
 ) }}
 
 SELECT
