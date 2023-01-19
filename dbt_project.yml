@@ -39,6 +39,7 @@ models:
 
 vars:
   "dbt_date:time_zone": GMT
+  "UPDATE_SNOWFLAKE_TAGS": TRUE
 
   dbt_constraints_enabled: false
   dbt_constraints_sources_enabled: true
@@ -55,3 +56,6 @@ on-run-start:
   - "{{ create_algorand_udf_bulk_get_tx_info() }}"
   - "{{ create_algorand_sp_bulk_get_contract_info() }}"
   - "{{ create_udf_base64_decode() }}"
+
+on-run-end:
+  - '{{ apply_meta_as_tags(results) }}'

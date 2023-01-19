@@ -2,7 +2,14 @@
     materialized = 'incremental',
     unique_key = 'fact_bridge_action_id',
     incremental_strategy = 'merge',
-    cluster_by = ['block_timestamp::DATE']
+    cluster_by = ['block_timestamp::DATE'],
+      meta={
+        'database_tags':{
+            'table': {
+                'PURPOSE': 'DEFI, BRIDGE'
+            }
+        }
+      }
 ) }}
 
 WITH base AS (

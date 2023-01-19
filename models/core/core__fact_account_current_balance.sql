@@ -2,7 +2,14 @@
     materialized = 'incremental',
     unique_key = 'fact_account_current_balance_id',
     incremental_strategy = 'merge',
-    cluster_by = ['created_at::DATE']
+    cluster_by = ['created_at::DATE'],
+      meta={
+        'database_tags':{
+            'table': {
+                'PURPOSE': 'BALANCES'
+            }
+        }
+      }
 ) }}
 
 WITH base AS (
