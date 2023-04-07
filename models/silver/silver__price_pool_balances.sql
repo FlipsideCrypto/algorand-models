@@ -33,8 +33,8 @@ base_price AS (
         1 RANK
     FROM
         {{ source(
-            'crosschain',
-            'fact_hourly_prices'
+            'crosschain_silver',
+            'hourly_prices_coin_gecko'
         ) }}
         p
     WHERE
